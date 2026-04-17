@@ -7,22 +7,22 @@
 #include <arpa/inet.h>     
 #include <netinet/in.h>
 
-/*
-	Leave it like this if you are testing on the same computer,
-	otherwise change it with server ip address
-*/
-#define SERVER_ADDRESS INADDR_ANY
-
 /* Random unused port */
 #define PORT 50000
 
 #define MAX_BUFFER_LEN 1024
 
-int main() {
+int main(int argc, char* argv[]) {
 	struct sockaddr_in servadr;
 	int sockfd;
 	char buffer[] = "Hello from client!\n";
 	size_t buffer_size;
+
+	if (argc != 2) {
+        fprintf(stderr, "Error: Missing server IP.\n");
+        fprintf(stderr, "Use: %s <server_IP_address>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
 	/* Create a socket */
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -35,7 +35,13 @@ int main() {
 	/* Fill server information */
 	servadr.sin_family = PF_INET;
 	servadr.sin_port = htons(PORT);
-	servadr.sin_addr.s_addr = htonl(SERVER_ADDRESS);
+
+	/* Fill server ip from command line argument */
+	if (inet_pton(AF_INET, argv[1], &servadr.sin_addr) <= 0) {
+        perror("Invalid address or Address not supported");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
 
 	/* Send message */
 	buffer_size = strlen(buffer);
