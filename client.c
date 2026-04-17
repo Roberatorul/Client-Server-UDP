@@ -14,7 +14,7 @@
 #define SERVER_ADDRESS INADDR_ANY
 
 /* Random unused port */
-#define PORT 50001
+#define PORT 50000
 
 #define MAX_BUFFER_LEN 1024
 
@@ -40,14 +40,14 @@ int main() {
 	/* Send message */
 	buffer_size = strlen(buffer);
 	if (sendto(sockfd, buffer, buffer_size, 0, 
-			  (const struct sockaddr *)&servadr, sizeof(servadr))) {
+			  (const struct sockaddr *)&servadr, sizeof(servadr)) < 0) {
 		perror("send failed");
 		exit(EXIT_FAILURE);
 	}
 	printf("Message sent.\n");
 
 	/* Receive message from server */
-	socklen_t recv_message_len;
+	socklen_t recv_message_len = sizeof(servadr);
 	ssize_t n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN, 0,
 						(const struct sockaddr *)&servadr, &recv_message_len);
 

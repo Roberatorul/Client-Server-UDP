@@ -21,7 +21,7 @@ int main() {
 	size_t buffer_size;
 
 	/* Create a socket */
-	if ((sockfd = socked(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		perror("socket creation failed");
 		exit(EXIT_FAILURE);
 	}
@@ -42,7 +42,7 @@ int main() {
 	}
 
 	/* Receive message from any ip */
-	socklen_t recv_message_len;
+	socklen_t recv_message_len = sizeof(cliaddr);
 	ssize_t n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN, 0,
 						(const struct sockaddr *)&cliaddr, &recv_message_len);
 	
@@ -58,7 +58,7 @@ int main() {
 	strcpy(buffer, "Hello from server!\n");
 	buffer_size = strlen(buffer);
 	if (sendto(sockfd, buffer, buffer_size, 0, 
-			  (const struct sockaddr *)&cliaddr, sizeof(cliaddr))) {
+			  (const struct sockaddr *)&cliaddr, sizeof(cliaddr)) < 0) {
 		perror("send failed");
 		exit(EXIT_FAILURE);
 	}
