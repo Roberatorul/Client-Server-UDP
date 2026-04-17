@@ -44,7 +44,7 @@ int main() {
 	/* Receive message from any ip */
 	socklen_t recv_message_len = sizeof(cliaddr);
 	ssize_t n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN, 0,
-						(const struct sockaddr *)&cliaddr, &recv_message_len);
+						(struct sockaddr *)&cliaddr, &recv_message_len);
 	
 	if (n < 0) {
 		perror("recv failed");

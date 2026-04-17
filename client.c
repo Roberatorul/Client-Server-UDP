@@ -49,7 +49,7 @@ int main() {
 	/* Receive message from server */
 	socklen_t recv_message_len = sizeof(servadr);
 	ssize_t n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN, 0,
-						(const struct sockaddr *)&servadr, &recv_message_len);
+						(struct sockaddr *)&servadr, &recv_message_len);
 
 	if (n < 0) {
 		perror("recv failed");
