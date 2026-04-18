@@ -19,6 +19,7 @@ int main() {
 		struct sockaddr_in cli_addr;
 		int output_file = -1;
 		int rc;
+		size_t num_recv_files = 1;
 
 		while (1) {
 			/* Clear gaarbage data */
@@ -36,7 +37,8 @@ int main() {
 				pkt.payload[pkt.len] = '\0';
 
 				/* Build file path */
-				std::string file_path = "./output/" + std::string(pkt.payload);
+				std::string file_path = "./output/" + std::to_string(num_recv_files)
+										+ std::string(pkt.payload);
                 std::cout << "[SERVER] Start receiving file: " << file_path << "\n";
 
 				output_file = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -52,6 +54,7 @@ int main() {
 					output_file = -1; // Reset file descriptor
 					std::cout << "[SERVER] File received\n\n";
 				}
+				num_recv_files++;
 				continue;
 			}
 
