@@ -56,7 +56,7 @@ int main() {
 			}
 
 			if (pkt.type == PacketType::DATA && output_file >= 0) {
-				std::cout << "Writing data to file...\n";
+				//std::cout << "Writing data to file...\n";
 				rc = write(output_file, pkt.payload, pkt.len);
 				if (rc < 0)
 					std::cerr << "write failed\n" ;
