@@ -38,7 +38,7 @@ int main() {
 
 				/* Build file path */
 				std::string file_path = "./output/" + std::to_string(num_recv_files)
-										+ std::string(pkt.payload);
+										+ "." + std::string(pkt.payload);
                 std::cout << "[SERVER] Start receiving file: " << file_path << "\n";
 
 				output_file = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
