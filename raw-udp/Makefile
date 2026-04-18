@@ -22,6 +22,5 @@ test_file:
 
 clean:
 	rm -f $(TARGETS) recv_* test.bin
-	@echo "Proiect curatat."
 
 .PHONY: all clean test_file
