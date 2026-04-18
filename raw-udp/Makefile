@@ -21,6 +21,6 @@ test_file:
 	@echo "File test.bin (5MB) was successfully created!"
 
 clean:
-	rm -f $(TARGETS) ./output test.bin
+	rm -rf $(TARGETS) ./output test.bin
 
 .PHONY: all clean test_file
