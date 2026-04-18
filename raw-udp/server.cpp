@@ -34,9 +34,12 @@ int main() {
 
 			if (pkt.type == PacketType::FILENAME) {
 				pkt.payload[pkt.len] = '\0';
-				printf("[SERVER] Satrt receiving file: %s\n", pkt.payload);
 
-				output_file = open(pkt.payload, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+				/* Build file path */
+				std::string file_path = "./output/" + std::string(pkt.payload);
+                std::cout << "[SERVER] Start receiving file: " << file_path << "\n";
+
+				output_file = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 				if (output_file < 0)
 					std::cerr << "open failed\n";
 				continue;
@@ -47,7 +50,7 @@ int main() {
 				if (output_file >= 0) {
 					close(output_file);
 					output_file = -1; // Reset file descriptor
-					printf("[SERVER] File received\n\n");
+					std::cout << "[SERVER] File received\n\n";
 				}
 				continue;
 			}
