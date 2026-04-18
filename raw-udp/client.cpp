@@ -10,8 +10,8 @@
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		fprintf(stderr, "Use: %s <server_IP_address> <path_to_file>\n", argv[0]);
-        exit(EXIT_FAILURE);
+		std::cerr << "Use " << argv[0] << " <server_IP_address> <path_to_file>\n";
+        return 1;
     }
 
 	std::string server_ip = argv[1];
