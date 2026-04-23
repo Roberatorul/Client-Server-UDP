@@ -61,5 +61,8 @@ void UdpSocket::setReceiveTimeout(int milliseconds) {
 	struct timeval tv;
 	tv.tv_sec = milliseconds / 1000;
 	tv.tv_usec = (milliseconds % 1000) * 1000;
-	setsockopt(this->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	int rc = setsockopt(this->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+	if (rc < 0)
+		throw std::runtime_error("Setsockopt failed");
 }
