@@ -49,7 +49,7 @@ void UdpSocket::sendPacket(const Packet& pkt,
 	}
 }
 
-ssize_t UdpSocket::recvPacket(Packet& pkt, struct sockaddr_in& sender_addr) {
+ssize_t UdpSocket::recvPacket(Packet& pkt, struct sockaddr_in& sender_addr) noexcept {
 	socklen_t len = sizeof(sender_addr);
     ssize_t n = recvfrom(sockfd, &pkt, sizeof(Packet), 0, 
                         (struct sockaddr *)&sender_addr, &len);
