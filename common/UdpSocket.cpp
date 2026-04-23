@@ -57,3 +57,9 @@ ssize_t UdpSocket::recvPacket(Packet& pkt, struct sockaddr_in& sender_addr) {
     return n;
 }
 
+void UdpSocket::setReceiveTimeout(int milliseconds) {
+	struct timeval tv;
+	tv.tv_sec = milliseconds / 1000;
+	tv.tv_usec = (milliseconds % 1000) * 1000;
+	setsockopt(this->sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+}
