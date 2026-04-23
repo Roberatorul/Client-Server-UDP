@@ -55,6 +55,9 @@ public:
 	* Return value is the one from recvfrom(), letting user decide how to handle errors
 	*/
 	ssize_t recvPacket(Packet& pkt, struct sockaddr_in& sender_addr);
+
+	/* Set a recvfrom() timeout for file descriptor */
+	void setReceiveTimeout(int milliseconds);
 };
 ```
 
