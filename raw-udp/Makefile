@@ -8,11 +8,11 @@ TARGETS = server client
 all: $(TARGETS)
 
 # server
-server: server.cpp ../common/UdpSocket.cpp
+server: server.cpp ../common/UdpSocket.cpp ../common/utils.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 # client
-client: client.cpp ../common/UdpSocket.cpp
+client: client.cpp ../common/UdpSocket.cpp ../common/utils.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 # create a random file
