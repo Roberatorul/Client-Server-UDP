@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+
 #include "../common/utils.hpp"
 #include "../common/UdpSocket.hpp"
 
@@ -10,7 +11,7 @@
 
 int main() {
 	try {
-		UdpSocket server_socket{};
+		UdpSocket server_socket;
 
 		server_socket.bindToPort(PORT);
 		std::cout << "Server listens to port: " << PORT << "...\n";
@@ -27,11 +28,8 @@ int main() {
 
 			/* Receive message from any ip */
 			ssize_t n = server_socket.recvPacket(pkt, cli_addr);
-
-			if (n < 0) {
-				std::cerr << "recv failed";
+			if (n < 0)
 				continue;
-			}
 
 			if (pkt.type == PacketType::FILENAME) {
 				pkt.payload[pkt.len] = '\0';
@@ -43,7 +41,8 @@ int main() {
 
 				output_file = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 				if (output_file < 0)
-					std::cerr << "open failed\n";
+					throw std::runtime_error("Open failed");
+
 				continue;
 			}
 
@@ -55,6 +54,7 @@ int main() {
 					std::cout << "[SERVER] File received\n\n";
 				}
 				num_recv_files++;
+
 				continue;
 			}
 
@@ -62,7 +62,7 @@ int main() {
 				//std::cout << "Writing data to file...\n";
 				rc = write(output_file, pkt.payload, pkt.len);
 				if (rc < 0)
-					std::cerr << "write failed\n" ;
+					throw std::runtime_error("Write failed");
 			}
 		}
 	} catch (const std::exception& e) {
