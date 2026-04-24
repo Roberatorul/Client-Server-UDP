@@ -31,3 +31,33 @@ make client # or make
 # To create a random 5MB file
 # make test_file 
 ./client server_ip file_path
+```
+
+## Performance measurements
+In `client.cpp` we have the following method for measuring performance:
+```cpp
+#include <chrono> // for performance measuring
+
+int main() {
+	/* Code */
+	std::cout << "Start transfer...\n";
+	/* Start clock */
+	auto begin = std::chrono::high_resolution_clock::now(); // measuring performance
+    while (true) {
+		/* Code */
+		std::cout << "[CLIENT] File " << file_path << " was sent!\n\n";
+
+		/* Stop clock */
+		auto end = std::chrono::high_resolution_clock::now();
+		/* Compute elapsed time */ 
+		std::chrono::duration<double> elapsed_seconds = end - begin;
+		std::cout << "[PERFORMANCE] Total time: " << elapsed_seconds.count() << " seconds\n";
+	}
+}
+```
+
+For a better measuring in `client` use:
+```bash
+make test_file
+./client server_ip test.bin
+```
