@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <chrono>
+
 #include "../common/UdpSocket.hpp"
 #include "../common/utils.hpp"
 
@@ -28,16 +30,12 @@ int main(int argc, char* argv[]) {
         serv_addr.sin_port = htons(PORT);
 
 		/* Fill server ip */
-		if (inet_pton(AF_INET, server_ip.c_str(), &serv_addr.sin_addr) <= 0) {
-            std::cerr << "Adresa IP invalida: " << server_ip << "\n";
-            return 1;
-        }
+		if (inet_pton(AF_INET, server_ip.c_str(), &serv_addr.sin_addr) <= 0)
+			throw std::runtime_error("Invalid IP address" + server_ip);
 
 		int input_file = open(file_path.c_str(), O_RDONLY);
-        if (input_file < 0) {
-            std::cerr << "Eroare la deschiderea fisierului: " << file_path << "\n";
-            return 1;
-        }
+        if (input_file < 0)
+			throw std::runtime_error("Open failed");
 
         Packet pkt;
 
@@ -58,17 +56,16 @@ int main(int argc, char* argv[]) {
         std::cout << "[CLIENT] Sending file name: " << dest_name << "...\n";
         client_socket.sendPacket(pkt, serv_addr);
 
-        size_t packet_number = 1;
+        //size_t packet_number = 1;
+		std::cout << "Start transfer...\n";
+		auto begin = std::chrono::high_resolution_clock::now(); // measuring performance
         while (true) {
             /* Reset pkt fields to 0 */
             memset(pkt.payload, 0, MAX_PAYLOAD_LEN);
             
             rc = read(input_file, pkt.payload, MAX_PAYLOAD_LEN);
-
-            if (rc < 0) {
-                std::cerr << "open failed!\n";
-                break;
-            }
+            if (rc < 0)
+				throw std::runtime_error("Open failed");
 
 			/* Reached EOF */
             if (rc == 0)
@@ -80,7 +77,7 @@ int main(int argc, char* argv[]) {
 
 			/* Send packet */
             client_socket.sendPacket(pkt, serv_addr);
-            std::cout << "Packet " << packet_number++ << " sent.\n"; 
+           // std::cout << "Packet " << packet_number++ << " sent.\n"; 
         }
 
 		/* Send EOF file */
@@ -92,6 +89,10 @@ int main(int argc, char* argv[]) {
 		std::cout << "EOF sent\n";
 
         std::cout << "[CLIENT] File " << file_path << " was sent!\n\n";
+
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - begin;
+		std::cout << "[PERFORMANCE] Total time: " << elapsed_seconds.count() << " seconds\n";
 
         close(input_file);
 	} catch (const std::exception& e) {
