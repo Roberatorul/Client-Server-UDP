@@ -34,5 +34,5 @@ This project aims to implement a **custom client-server architecture** over UDP 
 
 ## TODOs
 * [x] Implement `raw-udp` base logic
-* [] Implement `Go-Back-N-udp` (Sliding Window & Timeouts)
+* [x] Implement `Go-Back-N-udp` (Sliding Window & Timeouts)
 * [] Implement `parallel-udp` (Multithreading)
