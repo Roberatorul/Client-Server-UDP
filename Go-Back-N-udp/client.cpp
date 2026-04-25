@@ -9,7 +9,7 @@
 #include "../common/utils.hpp"
 
 /* Random unused port */
-#define PORT 50000
+#define PORT 50001
 
 /* Can vary */
 #define WINDOW_SIZE 25
