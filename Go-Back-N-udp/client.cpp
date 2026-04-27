@@ -11,6 +11,8 @@
 /* Random unused port */
 #define PORT 50001
 
+#define FIRST_PACKET 0
+
 /* Can vary */
 #define WINDOW_SIZE 25
 #define WAITING_TIME_MS 500
@@ -24,6 +26,19 @@ void fill_ipv4_address(struct sockaddr_in* addr, std::string addr_ip) {
 	if (inet_pton(AF_INET, addr_ip.c_str(), &addr->sin_addr) <= 0)
         throw std::runtime_error("Invalid Ip address" + addr_ip);
 
+}
+
+void create_header_packet(Packet& pkt, const std::string& file_path, uint32_t next_seq) {
+	//std::cout << "Filename packet is built...\n";
+
+	/* Get rid of absolute path markers if there are any */
+	size_t pos = file_path.find_last_of('/');
+	std::string base_name = (pos == std::string::npos) ? file_path : file_path.substr(pos + 1);
+	std::string dest_name = "recv_" + base_name;
+
+	//std::cout << "Building FILENAME packet...\n";
+	pkt.fill_packet(PacketType::FILENAME, next_seq, dest_name.length(), dest_name.c_str());
+	//std::cout << "FILENAME packet built: " << dest_name << '\n' ;
 }
 
 int main(int argc, char* argv[]) {
@@ -63,26 +78,15 @@ int main(int argc, char* argv[]) {
 		std::cout << "Start transfer...\n";
 		auto begin = std::chrono::high_resolution_clock::now(); // measuring performance
 		while (true) {
+			/* Send WINDOW_SIZE packets */
 			while (next_seq < first_unconfirmed_packet + WINDOW_SIZE && !eof_reached) {
 				Packet send_pkt;
 
-				if (next_seq == 0) { // First packet is the filename for server
-					//std::cout << "Filename packet is built...\n";
-					/* Build packet payload */
-					// Get rid of absolute path markers if there are any
-					size_t pos = file_path.find_last_of('/');
-					std::string base_name = (pos == std::string::npos) ? file_path : file_path.substr(pos + 1);
-					std::string dest_name = "recv_" + base_name;
-					
-
-					//std::cout << "Building FILENAME packet...\n";
-					send_pkt.fill_packet(PacketType::FILENAME, next_seq, dest_name.length(), dest_name.c_str());
-					//std::cout << "FILENAME packet built: " << dest_name << '\n' ;
-
+				if (next_seq == FIRST_PACKET) { // First packet is the filename for server
+					create_header_packet(send_pkt, file_path, next_seq);
 				} else {
 					//std::cout << "Reading data from file...\n";
 					rc = read(input_file, buffer, MAX_PAYLOAD_LEN);
-
 					if (rc < 0) {
 						throw std::runtime_error("Reading from file error");
 					} else if (rc == 0) {
@@ -94,11 +98,11 @@ int main(int argc, char* argv[]) {
 					}
 				}
 
-					dq.push_back(send_pkt);
-					//std::cout << "Trying to send packet...\n";
-					client_socket.sendPacket(send_pkt, serv_addr);
-					//std::cout << "Packet with " << next_seq << " seq_num was sent\n";
-					next_seq++;
+				dq.push_back(send_pkt);
+				//std::cout << "Trying to send packet...\n";
+				client_socket.sendPacket(send_pkt, serv_addr);
+				//std::cout << "Packet with " << next_seq << " seq_num was sent\n";
+				next_seq++;
 			}
 
 			Packet ack_pkt;
@@ -121,7 +125,7 @@ int main(int argc, char* argv[]) {
             } else {
                 if (ack_pkt.type == PacketType::ACK) {
                     //std::cout << "[RECEIVED ACK] ACK for seq_num: " << ack_pkt.seq_num << '\n';
-                    
+
 					/* Check if we got a good seq_num*/
                     if (ack_pkt.seq_num >= first_unconfirmed_packet) {
 						/* Remove confirmed packets from dq */
@@ -132,10 +136,11 @@ int main(int argc, char* argv[]) {
                                 dq.pop_front();
                             }
                         }
-                        
+
 						/* Move first_unconfirmed_packet */
                         first_unconfirmed_packet = ack_pkt.seq_num + 1;
 
+						/* Check if EOF is reached or dq has no more packets to send */
                         if (eof_reached && dq.empty()) {
                             std::cout << "[CLIENT] File " << file_path << " was sent!\n\n";
                             break;
@@ -143,11 +148,12 @@ int main(int argc, char* argv[]) {
                     }
 				} else {
 					/* This should not be reached*/
-					//std::cout << "Ignored packet! Client was waiting for PacketType::ACK\n";
+					std::cout << "Ignored packet! Client was waiting for PacketType::ACK\n";
 				}
 			}
 		}
 
+		/* Compute performance */
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed_seconds = end - begin;
 		std::cout << "[PERFORMANCE] Total time: " << elapsed_seconds.count() << " seconds\n";
